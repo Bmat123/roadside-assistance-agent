@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadside Assistance Agent - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0a0e27;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .demo-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* Left Panel - Customer Interface */
+        .customer-panel {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .agent-container {
+            width: 100%;
+            max-width: 400px;
+            height: 700px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        .status-bar {
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+        .conversation {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background-color: #fafafa;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            max-width: 85%;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #667eea;
+            color: white;
+            align-self: flex-end;
+        }
+        .agent-message {
+            background-color: #fff;
+            color: #333;
+            align-self: flex-start;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .sms-notification {
+            display: none;
+            border-left: 4px solid #34c759;
+            background-color: #f0fdf4;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(52,199,89,0.15);
+        }
+        .sms-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #059669;
+            font-size: 0.95em;
+        }
+        .sms-content {
+            font-size: 0.9em;
+            color: #065f46;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        .controls {
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+            background-color: #fff;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        .conversation-mode {
+            font-size: 0.85em;
+            color: #34c759;
+            font-weight: 600;
+            display: none;
+        }
+        .conversation-mode.active {
+            display: block;
+        }
+        #micButton {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 28px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(52,199,89,0.3);
+        }
+        #micButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(52,199,89,0.4);
+        }
+        #micButton.listening {
+            background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Right Panel - Human Observer Dashboard */
+        .observer-panel {
+            background-color: #0a0e27;
+            color: #fff;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .dashboard-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 15px;
+        }
+        .dashboard-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dashboard-header p {
+            color: #8b92b0;
+            font-size: 0.95em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .info-card {
+            background-color: #1a1f3a;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #2a2f4a;
+        }
+        .info-card h3 {
+            font-size: 0.85em;
+            color: #8b92b0;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-card .value {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .info-card.empty .value {
+            color: #4a5073;
+            font-style: italic;
+        }
+
+        .section {
+            background-color: #1a1f3a;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2f4a;
+        }
+        .section-title {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .coverage-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .coverage-status.pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .coverage-status.covered {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .coverage-status.not-covered {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .dispatch-info {
+            background-color: #0f1729;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        .dispatch-info.active {
+            display: block;
+        }
+        .dispatch-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2f4a;
+        }
+        .dispatch-row:last-child {
+            border-bottom: none;
+        }
+        .dispatch-label {
+            color: #8b92b0;
+            font-size: 0.9em;
+        }
+        .dispatch-value {
+            color: #fff;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .additional-services {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .service-badge {
+            background-color: #667eea;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .conversation-log {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .log-entry {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #0f1729;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        .log-entry.user {
+            border-left-color: #34c759;
+        }
+        .log-label {
+            font-size: 0.75em;
+            color: #8b92b0;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .log-text {
+            color: #fff;
+            line-height: 1.5;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1f3a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid #4a5073;
+            color: #8b92b0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+        .reset-btn:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+            background: rgba(255,107,107,0.08);
+        }
+    </style>
+</head>
+<body>
+
+<div class="demo-container">
+    <!-- Left Panel: Customer Interface -->
+    <div class="customer-panel">
+        <div class="agent-container">
+            <div class="header">
+                <h1>Roadside Assistance</h1>
+                <p>AI-Powered Support</p>
+            </div>
+            <div class="status-bar" id="status">Press the Mic to Start</div>
+            <div class="conversation" id="conversation">
+                <!-- Messages will be added here -->
+            </div>
+            <div class="sms-notification" id="sms-notification">
+                <div class="sms-header">📱 Dispatch Confirmation</div>
+                <div class="sms-content" id="sms-content"></div>
+            </div>
+            <div class="controls">
+                <button id="micButton">🎤</button>
+                <div class="conversation-mode" id="conversationMode">
+                    ✨ Hands-free mode active
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel: Observer Dashboard -->
+    <div class="observer-panel">
+        <div class="dashboard-header">
+            <h2>Human Observer Dashboard</h2>
+            <p>Real-time monitoring of AI agent interactions</p>
+            <button class="reset-btn" id="resetBtn">↺ New Session</button>
+        </div>
+
+        <!-- Collected Data Grid -->
+        <div class="info-grid">
+            <div class="info-card" id="card-name">
+                <h3>Customer Name</h3>
+                <div class="value">Waiting...</div>
+            </div>
+            <div class="info-card" id="card-car">
+                <h3>Vehicle Model</h3>
+                <div class="value">Waiting...</div>
+            </div>
+            <div class="info-card" id="card-location">
+                <h3>Location</h3>
+                <div class="value">Waiting...</div>
+            </div>
+            <div class="info-card" id="card-issue">
+                <h3>Issue Type</h3>
+                <div class="value">Waiting...</div>
+            </div>
+        </div>
+
+        <!-- Coverage Status -->
+        <div class="section">
+            <div class="section-title">Coverage Analysis</div>
+            <div id="coverage-status">
+                <span class="coverage-status pending">Awaiting Information</span>
+            </div>
+        </div>
+
+        <!-- Dispatch Information -->
+        <div class="section">
+            <div class="section-title">Dispatch Details</div>
+            <div class="dispatch-info" id="dispatch-info">
+                <div class="dispatch-row">
+                    <span class="dispatch-label">Service Type</span>
+                    <span class="dispatch-value" id="dispatch-service-type">-</span>
+                </div>
+                <div class="dispatch-row">
+                    <span class="dispatch-label">Garage</span>
+                    <span class="dispatch-value" id="dispatch-garage">-</span>
+                </div>
+                <div class="dispatch-row">
+                    <span class="dispatch-label">Address</span>
+                    <span class="dispatch-value" id="dispatch-address">-</span>
+                </div>
+                <div class="dispatch-row">
+                    <span class="dispatch-label">ETA</span>
+                    <span class="dispatch-value" id="dispatch-eta">-</span>
+                </div>
+                <div class="dispatch-row">
+                    <span class="dispatch-label">Priority</span>
+                    <span class="dispatch-value" id="dispatch-priority">-</span>
+                </div>
+                <div id="additional-services-container" style="display: none;">
+                    <div class="section-title" style="margin-top: 20px; font-size: 0.95em;">Additional Services Dispatched</div>
+                    <div class="additional-services" id="additional-services"></div>
+                </div>
+            </div>
+            <div id="no-dispatch" style="color: #8b92b0; font-style: italic;">
+                No dispatch information yet
+            </div>
+        </div>
+
+        <!-- Conversation Log -->
+        <div class="section">
+            <div class="section-title">Conversation Transcript</div>
+            <div class="conversation-log" id="conversation-log">
+                <p style="color: #8b92b0; font-style: italic;">Conversation will appear here...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURATION ---
+    const BACKEND_URL = "http://127.0.0.1:8000/agent/chat";
+
+    // --- UI ELEMENTS ---
+    const micButton = document.getElementById('micButton');
+    const statusDiv = document.getElementById('status');
+    const conversationDiv = document.getElementById('conversation');
+    const smsNotificationDiv = document.getElementById('sms-notification');
+    const smsContentDiv = document.getElementById('sms-content');
+    const conversationLogDiv = document.getElementById('conversation-log');
+    const conversationModeDiv = document.getElementById('conversationMode');
+
+    // Observer panel elements
+    const cardName = document.getElementById('card-name');
+    const cardCar = document.getElementById('card-car');
+    const cardLocation = document.getElementById('card-location');
+    const cardIssue = document.getElementById('card-issue');
+    const coverageStatusDiv = document.getElementById('coverage-status');
+    const dispatchInfoDiv = document.getElementById('dispatch-info');
+    const noDispatchDiv = document.getElementById('no-dispatch');
+
+    // --- STATE ---
+    let sessionId = `session_${Date.now()}`;
+    let isListening = false;
+    let hasResult = false;
+    let ignoreEnd = false;
+    let conversationStarted = false;  // Track if conversation has begun
+
+    // --- SPEECH RECOGNITION (Voice-to-Text) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Sorry, your browser does not support the Web Speech API. Please use Chrome or Edge.");
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+        isListening = true;
+        hasResult = false;
+        ignoreEnd = false;
+        micButton.classList.add('listening');
+        statusDiv.textContent = "🎙️ Listening...";
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        micButton.classList.remove('listening');
+        if (!ignoreEnd) {
+            if (hasResult) {
+                statusDiv.textContent = "⚙️ Processing...";
+            } else {
+                statusDiv.textContent = "Press the Mic to Start";
+            }
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        let msg = "Error in recognition. Try again.";
+        if (event.error === 'no-speech') {
+            msg = "No speech detected. Please speak louder.";
+        } else if (event.error === 'not-allowed') {
+            msg = "Microphone access denied.";
+        }
+        statusDiv.textContent = msg;
+        ignoreEnd = true;
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        hasResult = true;
+        addMessage(transcript, 'user');
+        addLogEntry(transcript, 'user');
+        sendTextToBackend(transcript);
+    };
+
+    // --- SPEECH SYNTHESIS (Text-to-Speech) ---
+    function speak(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => {
+            // Auto-restart microphone after AI finishes speaking (if conversation started)
+            if (conversationStarted && !isListening) {
+                statusDiv.textContent = "🎙️ Listening (auto-activated)...";
+                setTimeout(() => {
+                    if (!isListening) {
+                        recognition.start();
+                    }
+                }, 500);  // Small delay to avoid overlap
+            } else {
+                statusDiv.textContent = "Press the Mic to Reply";
+            }
+        };
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // --- UI & API LOGIC ---
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', `${sender}-message`);
+        messageDiv.textContent = text;
+        conversationDiv.appendChild(messageDiv);
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+    }
+
+    function addLogEntry(text, sender) {
+        // Clear initial message
+        if (conversationLogDiv.querySelector('p[style*="italic"]')) {
+            conversationLogDiv.innerHTML = '';
+        }
+
+        const entry = document.createElement('div');
+        entry.classList.add('log-entry', sender);
+        entry.innerHTML = `
+            <div class="log-label">${sender === 'user' ? 'Customer' : 'AI Agent'}</div>
+            <div class="log-text">${text}</div>
+        `;
+        conversationLogDiv.appendChild(entry);
+        conversationLogDiv.scrollTop = conversationLogDiv.scrollHeight;
+    }
+
+    function updateCollectedData(data) {
+        if (!data) return;
+
+        if (data.name) {
+            cardName.querySelector('.value').textContent = data.name;
+            cardName.classList.remove('empty');
+        }
+        if (data.car) {
+            cardCar.querySelector('.value').textContent = data.car;
+            cardCar.classList.remove('empty');
+        }
+        if (data.location) {
+            cardLocation.querySelector('.value').textContent = data.location;
+            cardLocation.classList.remove('empty');
+        }
+        if (data.issue) {
+            cardIssue.querySelector('.value').textContent = data.issue;
+            cardIssue.classList.remove('empty');
+        }
+    }
+
+    function updateCoverageStatus(isCovered) {
+        if (isCovered === true) {
+            coverageStatusDiv.innerHTML = '<span class="coverage-status covered">✓ COVERED - Dispatching Help</span>';
+        } else if (isCovered === false) {
+            coverageStatusDiv.innerHTML = '<span class="coverage-status not-covered">✗ NOT COVERED</span>';
+        } else {
+            coverageStatusDiv.innerHTML = '<span class="coverage-status pending">Awaiting Information</span>';
+        }
+    }
+
+    function updateDispatchInfo(dispatchDetails) {
+        if (!dispatchDetails) return;
+
+        dispatchInfoDiv.classList.add('active');
+        noDispatchDiv.style.display = 'none';
+
+        document.getElementById('dispatch-service-type').textContent =
+            dispatchDetails.service_type.replace('_', ' ').toUpperCase();
+        document.getElementById('dispatch-garage').textContent = dispatchDetails.garage_name;
+        document.getElementById('dispatch-address').textContent = dispatchDetails.garage_address;
+        document.getElementById('dispatch-eta').textContent = dispatchDetails.estimated_arrival;
+        document.getElementById('dispatch-priority').textContent = dispatchDetails.priority.toUpperCase();
+
+        // Show additional services if any
+        if (dispatchDetails.additional_services && dispatchDetails.additional_services.length > 0) {
+            const servicesContainer = document.getElementById('additional-services-container');
+            const servicesDiv = document.getElementById('additional-services');
+            servicesContainer.style.display = 'block';
+            servicesDiv.innerHTML = '';
+
+            dispatchDetails.additional_services.forEach(service => {
+                const badge = document.createElement('span');
+                badge.classList.add('service-badge');
+                badge.textContent = service.replace('_', ' ').toUpperCase();
+                servicesDiv.appendChild(badge);
+            });
+        }
+    }
+
+    async function sendTextToBackend(text) {
+        try {
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId, text: text })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Add agent's response to chat
+            addMessage(data.voice_response, 'agent');
+            addLogEntry(data.voice_response, 'agent');
+
+            // Speak the agent's response
+            speak(data.voice_response);
+
+            // Update observer dashboard with collected data
+            if (data.collected_data) {
+                updateCollectedData(data.collected_data);
+            }
+
+            // Update coverage status
+            if (data.is_covered !== undefined) {
+                updateCoverageStatus(data.is_covered);
+            }
+
+            // Update dispatch information
+            if (data.dispatch_details) {
+                updateDispatchInfo(data.dispatch_details);
+            }
+
+            // Handle UI updates like the "Fake SMS"
+            if (data.ui_update && data.ui_update.type === 'SMS_NOTIFICATION') {
+                smsContentDiv.textContent = data.ui_update.content;
+                smsNotificationDiv.style.display = 'block';
+                statusDiv.textContent = "✅ Dispatch Confirmed!";
+            }
+
+        } catch (error) {
+            console.error("Error communicating with backend:", error);
+            statusDiv.textContent = "❌ Connection Error";
+            addMessage("I'm having trouble connecting to my system. Please try again later.", 'agent');
+        }
+    }
+
+    // --- RESET SESSION ---
+    function resetSession() {
+        // Stop any active speech
+        window.speechSynthesis.cancel();
+        if (isListening) {
+            ignoreEnd = true;
+            recognition.stop();
+        }
+
+        // Reset state
+        sessionId = `session_${Date.now()}`;
+        isListening = false;
+        hasResult = false;
+        ignoreEnd = false;
+        conversationStarted = false;
+
+        // Reset customer panel
+        conversationDiv.innerHTML = '';
+        smsNotificationDiv.style.display = 'none';
+        smsContentDiv.textContent = '';
+        statusDiv.textContent = 'Press the Mic to Start';
+        micButton.classList.remove('listening');
+        conversationModeDiv.classList.remove('active');
+
+        // Reset dashboard cards
+        ['card-name', 'card-car', 'card-location', 'card-issue'].forEach(id => {
+            const card = document.getElementById(id);
+            card.querySelector('.value').textContent = 'Waiting...';
+            card.classList.remove('empty');
+        });
+
+        // Reset coverage status
+        coverageStatusDiv.innerHTML = '<span class="coverage-status pending">Awaiting Information</span>';
+
+        // Reset dispatch info
+        dispatchInfoDiv.classList.remove('active');
+        noDispatchDiv.style.display = 'block';
+        document.getElementById('additional-services-container').style.display = 'none';
+        document.getElementById('additional-services').innerHTML = '';
+
+        // Reset conversation log
+        conversationLogDiv.innerHTML = '<p style="color: #8b92b0; font-style: italic;">Conversation will appear here...</p>';
+
+        // Show welcome message again
+        const welcomeText = "Welcome to Roadside Assistance. To begin, please press the microphone button and tell me what's wrong.";
+        addMessage(welcomeText, 'agent');
+        addLogEntry(welcomeText, 'agent');
+        speak(welcomeText);
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById('resetBtn').addEventListener('click', resetSession);
+
+    micButton.addEventListener('click', () => {
+        if (isListening) {
+            recognition.stop();
+        } else {
+            conversationStarted = true;  // Enable auto-reactivation
+            conversationModeDiv.classList.add('active');  // Show hands-free indicator
+            recognition.start();
+        }
+    });
+
+    // Initial greeting
+    window.addEventListener('load', () => {
+        if (window.location.protocol === 'file:') {
+            alert("Microphone access is blocked on file:// URLs.\nPlease run: python -m http.server 8080\nThen open: http://localhost:8080");
+            statusDiv.textContent = "Error: Open via http://localhost";
+        }
+        const welcomeText = "Welcome to Roadside Assistance. To begin, please press the microphone button and tell me what's wrong.";
+        addMessage(welcomeText, 'agent');
+        addLogEntry(welcomeText, 'agent');
+        speak(welcomeText);
+    });
+
+</script>
+
+</body>
+</html>

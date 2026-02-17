@@ -1,0 +1,84 @@
+{
+  "garages": [
+    {
+      "id": "G001",
+      "name": "Quick Fix Auto Repair",
+      "address": "123 Main St, San Francisco, CA",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "services": ["tire_change", "battery_jump", "minor_repair"],
+      "rating": 4.5,
+      "estimated_arrival": "30 min"
+    },
+    {
+      "id": "G002",
+      "name": "Downtown Towing & Repair",
+      "address": "456 Market St, San Francisco, CA",
+      "latitude": 37.7849,
+      "longitude": -122.4094,
+      "services": ["towing", "major_repair", "tire_change"],
+      "rating": 4.8,
+      "estimated_arrival": "25 min"
+    },
+    {
+      "id": "G003",
+      "name": "Bay Area Auto Service",
+      "address": "789 Oak St, Oakland, CA",
+      "latitude": 37.8044,
+      "longitude": -122.2712,
+      "services": ["tire_change", "battery_jump", "towing", "engine_repair"],
+      "rating": 4.3,
+      "estimated_arrival": "45 min"
+    },
+    {
+      "id": "G004",
+      "name": "Highway Emergency Repairs",
+      "address": "321 Highway 101, Palo Alto, CA",
+      "latitude": 37.4419,
+      "longitude": -122.1430,
+      "services": ["tire_change", "battery_jump", "minor_repair"],
+      "rating": 4.6,
+      "estimated_arrival": "20 min"
+    },
+    {
+      "id": "G005",
+      "name": "Premium Tow & Transport",
+      "address": "555 Valencia St, San Jose, CA",
+      "latitude": 37.3382,
+      "longitude": -121.8863,
+      "services": ["towing", "flatbed_transport", "luxury_vehicle_handling"],
+      "rating": 4.9,
+      "estimated_arrival": "35 min"
+    }
+  ],
+  "dispatch_rules": {
+    "flat_tire": {
+      "service_type": "repair_truck",
+      "required_service": "tire_change",
+      "priority": "medium"
+    },
+    "battery_dead": {
+      "service_type": "repair_truck",
+      "required_service": "battery_jump",
+      "priority": "high"
+    },
+    "engine_failure": {
+      "service_type": "tow_truck",
+      "required_service": "towing",
+      "priority": "high",
+      "additional_services": ["rental_car", "taxi"]
+    },
+    "transmission_issue": {
+      "service_type": "tow_truck",
+      "required_service": "towing",
+      "priority": "high",
+      "additional_services": ["rental_car"]
+    },
+    "accident_damage": {
+      "service_type": "tow_truck",
+      "required_service": "towing",
+      "priority": "critical",
+      "additional_services": ["taxi"]
+    }
+  }
+}

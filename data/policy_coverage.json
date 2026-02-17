@@ -1,0 +1,158 @@
+{
+  "policy_types": {
+    "basic": {
+      "name": "Basic Roadside Assistance",
+      "annual_cost": 59,
+      "coverage_limit": 3,
+      "max_tow_distance": 10,
+      "included_services": [
+        "tire_change",
+        "battery_jump",
+        "fuel_delivery",
+        "lockout_service"
+      ],
+      "excluded_services": [
+        "towing",
+        "winching",
+        "mechanical_repair"
+      ]
+    },
+    "premium": {
+      "name": "Premium Roadside Assistance",
+      "annual_cost": 129,
+      "coverage_limit": 6,
+      "max_tow_distance": 100,
+      "included_services": [
+        "tire_change",
+        "battery_jump",
+        "fuel_delivery",
+        "lockout_service",
+        "towing",
+        "winching",
+        "rental_car_reimbursement"
+      ],
+      "excluded_services": []
+    },
+    "platinum": {
+      "name": "Platinum Roadside Assistance",
+      "annual_cost": 199,
+      "coverage_limit": "unlimited",
+      "max_tow_distance": 200,
+      "included_services": [
+        "tire_change",
+        "battery_jump",
+        "fuel_delivery",
+        "lockout_service",
+        "towing",
+        "winching",
+        "rental_car_reimbursement",
+        "hotel_accommodation",
+        "trip_interruption_coverage",
+        "concierge_service"
+      ],
+      "excluded_services": []
+    }
+  },
+  "coverage_rules": [
+    {
+      "issue_type": "flat_tire",
+      "issue_keywords": ["flat tire", "tire puncture", "blown tire", "tire damage"],
+      "covered_by": ["basic", "premium", "platinum"],
+      "service_required": "tire_change",
+      "description": "Tire change service is included in all policies. We'll replace your flat tire with your spare.",
+      "conditions": "Vehicle must have a functional spare tire. Does not include tire replacement cost."
+    },
+    {
+      "issue_type": "battery_dead",
+      "issue_keywords": ["battery dead", "won't start", "battery", "jump start", "dead battery"],
+      "covered_by": ["basic", "premium", "platinum"],
+      "service_required": "battery_jump",
+      "description": "Battery jump start is included in all policies. We'll provide a jump start to get you moving.",
+      "conditions": "If battery needs replacement, customer is responsible for battery cost."
+    },
+    {
+      "issue_type": "out_of_fuel",
+      "issue_keywords": ["out of gas", "no fuel", "empty tank", "ran out"],
+      "covered_by": ["basic", "premium", "platinum"],
+      "service_required": "fuel_delivery",
+      "description": "Emergency fuel delivery (up to 2 gallons) to get you to nearest gas station.",
+      "conditions": "Customer pays for fuel cost. Delivery service is free."
+    },
+    {
+      "issue_type": "locked_out",
+      "issue_keywords": ["locked out", "keys locked", "lost keys", "lockout"],
+      "covered_by": ["basic", "premium", "platinum"],
+      "service_required": "lockout_service",
+      "description": "Professional locksmith service to help you access your vehicle.",
+      "conditions": "Does not cover key replacement costs."
+    },
+    {
+      "issue_type": "engine_failure",
+      "issue_keywords": ["engine", "overheating", "smoke", "engine failure", "won't run", "stalled"],
+      "covered_by": ["premium", "platinum"],
+      "service_required": "towing",
+      "description": "Towing to nearest qualified repair facility.",
+      "conditions": "Basic policy holders: Not covered. Premium: Up to 100 miles. Platinum: Up to 200 miles.",
+      "not_covered_reason": "Engine repairs and towing require Premium or Platinum coverage."
+    },
+    {
+      "issue_type": "transmission_issue",
+      "issue_keywords": ["transmission", "gears", "won't shift", "transmission failure"],
+      "covered_by": ["premium", "platinum"],
+      "service_required": "towing",
+      "description": "Towing to nearest transmission specialist or preferred repair shop.",
+      "conditions": "Repair costs not included. Rental car available for Premium/Platinum members.",
+      "not_covered_reason": "Transmission issues require Premium or Platinum coverage for towing."
+    },
+    {
+      "issue_type": "accident_damage",
+      "issue_keywords": ["accident", "crash", "collision", "hit", "damaged"],
+      "covered_by": ["premium", "platinum"],
+      "service_required": "towing",
+      "description": "Emergency towing from accident scene to repair facility or impound.",
+      "conditions": "Coordinate with police report. May require separate collision coverage claim.",
+      "not_covered_reason": "Accident towing requires Premium or Platinum coverage."
+    },
+    {
+      "issue_type": "stuck_vehicle",
+      "issue_keywords": ["stuck", "mud", "snow", "ditch", "off-road"],
+      "covered_by": ["premium", "platinum"],
+      "service_required": "winching",
+      "description": "Winching service to extract vehicle from mud, snow, or ditch (within 100 feet of paved road).",
+      "conditions": "Vehicle must be accessible by service truck. Off-road recovery not covered.",
+      "not_covered_reason": "Winching services require Premium or Platinum coverage."
+    }
+  ],
+  "customer_policy_database": {
+    "default_policy": "basic",
+    "model_based_policies": {
+      "luxury_vehicles": {
+        "models": ["bmw", "mercedes", "audi", "lexus", "tesla", "porsche"],
+        "default_policy": "premium",
+        "note": "Luxury vehicle owners typically have Premium or Platinum coverage"
+      },
+      "economy_vehicles": {
+        "models": ["honda civic", "toyota corolla", "ford focus", "hyundai elantra", "nissan sentra"],
+        "default_policy": "basic",
+        "note": "Economy vehicle owners typically have Basic coverage"
+      }
+    }
+  },
+  "additional_benefits": {
+    "premium": {
+      "rental_car": "Up to $50/day for 3 days while vehicle is being repaired",
+      "trip_interruption": "Not included"
+    },
+    "platinum": {
+      "rental_car": "Up to $75/day for 5 days while vehicle is being repaired",
+      "trip_interruption": "Up to $500 for hotel, meals, and alternate transportation if breakdown occurs 100+ miles from home",
+      "concierge": "24/7 travel planning and reservation assistance"
+    }
+  },
+  "policy_notes": [
+    "All coverage is subject to annual service limits (Basic: 3 calls, Premium: 6 calls, Platinum: Unlimited)",
+    "Services must be arranged through our dispatch center to be covered",
+    "Member is responsible for repair costs, parts, and any non-covered services",
+    "Coverage area: Continental United States and Canada"
+  ]
+}
