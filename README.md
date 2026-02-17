@@ -155,13 +155,7 @@ roadside-assistance-agent/
 - Conversation transcript log
 
 
----
 
-## 📞 Contact & Support
-
-**Demo Contact:** [Your Name]
-**Email:** your.email@company.com
-**Demo Date:** 17.02.2026
 
 ---
 
