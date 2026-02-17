@@ -92,7 +92,7 @@ This prototype demonstrates an end-to-end AI-powered roadside assistance solutio
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/roadside-assistance-agent.git
+git clone https://github.com/BMat123/roadside-assistance-agent.git
 cd roadside-assistance-agent
 
 # 2. Install dependencies
