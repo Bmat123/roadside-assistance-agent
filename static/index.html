@@ -329,6 +329,58 @@
             background: #764ba2;
         }
 
+        .case-summary {
+            background: linear-gradient(135deg, #1a2a1a 0%, #1a1f3a 100%);
+            border: 1px solid #34c759;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .case-summary.active {
+            display: block;
+        }
+        .case-summary .section-title {
+            color: #34c759;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2f4a;
+            font-size: 0.9em;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: #8b92b0;
+        }
+        .summary-value {
+            color: #fff;
+            font-weight: 600;
+            text-align: right;
+        }
+        .summary-value.covered {
+            color: #34c759;
+        }
+        .summary-value.not-covered {
+            color: #ff6b6b;
+        }
+        .case-closed-badge {
+            display: inline-block;
+            background: #34c759;
+            color: #000;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .reset-btn {
             background: transparent;
             border: 1px solid #4a5073;
@@ -444,6 +496,46 @@
             </div>
         </div>
 
+        <!-- Case Summary (shown when conversation is complete) -->
+        <div class="case-summary" id="case-summary">
+            <div class="section-title">
+                Case Summary
+                <span class="case-closed-badge">Closed</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Case Start</span>
+                <span class="summary-value" id="summary-start">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Case End</span>
+                <span class="summary-value" id="summary-end">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Duration</span>
+                <span class="summary-value" id="summary-duration">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Customer</span>
+                <span class="summary-value" id="summary-name">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Vehicle</span>
+                <span class="summary-value" id="summary-car">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Issue</span>
+                <span class="summary-value" id="summary-issue">-</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Outcome</span>
+                <span class="summary-value" id="summary-outcome">-</span>
+            </div>
+            <div class="summary-row" id="summary-garage-row">
+                <span class="summary-label">Dispatched To</span>
+                <span class="summary-value" id="summary-garage">-</span>
+            </div>
+        </div>
+
         <!-- Conversation Log -->
         <div class="section">
             <div class="section-title">Conversation Transcript</div>
@@ -481,7 +573,11 @@
     let isListening = false;
     let hasResult = false;
     let ignoreEnd = false;
-    let conversationStarted = false;  // Track if conversation has begun
+    let conversationStarted = false;
+    let caseStartTime = null;
+    let lastDispatchDetails = null;
+    let lastCollectedData = null;
+    let lastIsCovered = false;
 
     // --- SPEECH RECOGNITION (Voice-to-Text) ---
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -661,16 +757,24 @@
             // Update observer dashboard with collected data
             if (data.collected_data) {
                 updateCollectedData(data.collected_data);
+                lastCollectedData = data.collected_data;
             }
 
             // Update coverage status
             if (data.is_covered !== undefined) {
                 updateCoverageStatus(data.is_covered);
+                lastIsCovered = data.is_covered;
             }
 
             // Update dispatch information
             if (data.dispatch_details) {
                 updateDispatchInfo(data.dispatch_details);
+                lastDispatchDetails = data.dispatch_details;
+            }
+
+            // Show case summary when conversation is complete
+            if (data.conversation_complete) {
+                setTimeout(showCaseSummary, 1500); // small delay so final speech starts first
             }
 
             // Handle UI updates like the "Fake SMS"
@@ -685,6 +789,50 @@
             statusDiv.textContent = "❌ Connection Error";
             addMessage("I'm having trouble connecting to my system. Please try again later.", 'agent');
         }
+    }
+
+    // --- CASE SUMMARY ---
+    function showCaseSummary() {
+        const endTime = new Date();
+        const durationMs = endTime - caseStartTime;
+        const durationSec = Math.round(durationMs / 1000);
+        const durationStr = durationSec >= 60
+            ? `${Math.floor(durationSec / 60)}m ${durationSec % 60}s`
+            : `${durationSec}s`;
+
+        const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        document.getElementById('summary-start').textContent = fmt(caseStartTime);
+        document.getElementById('summary-end').textContent = fmt(endTime);
+        document.getElementById('summary-duration').textContent = durationStr;
+        document.getElementById('summary-name').textContent = lastCollectedData?.name || '-';
+        document.getElementById('summary-car').textContent = lastCollectedData?.car || '-';
+        document.getElementById('summary-issue').textContent = lastCollectedData?.issue || '-';
+
+        const outcomeEl = document.getElementById('summary-outcome');
+        if (lastIsCovered) {
+            outcomeEl.textContent = '✓ Covered — Help Dispatched';
+            outcomeEl.className = 'summary-value covered';
+        } else {
+            outcomeEl.textContent = '✗ Not Covered';
+            outcomeEl.className = 'summary-value not-covered';
+        }
+
+        const garageRow = document.getElementById('summary-garage-row');
+        if (lastDispatchDetails?.garage_name) {
+            document.getElementById('summary-garage').textContent =
+                `${lastDispatchDetails.garage_name} (ETA ${lastDispatchDetails.estimated_arrival})`;
+            garageRow.style.display = 'flex';
+        } else {
+            garageRow.style.display = 'none';
+        }
+
+        document.getElementById('case-summary').classList.add('active');
+
+        // Stop hands-free mode
+        conversationStarted = false;
+        conversationModeDiv.classList.remove('active');
+        statusDiv.textContent = '✅ Case closed';
     }
 
     // --- RESET SESSION ---
@@ -702,6 +850,10 @@
         hasResult = false;
         ignoreEnd = false;
         conversationStarted = false;
+        caseStartTime = null;
+        lastDispatchDetails = null;
+        lastCollectedData = null;
+        lastIsCovered = false;
 
         // Reset customer panel
         conversationDiv.innerHTML = '';
@@ -727,6 +879,9 @@
         document.getElementById('additional-services-container').style.display = 'none';
         document.getElementById('additional-services').innerHTML = '';
 
+        // Hide case summary
+        document.getElementById('case-summary').classList.remove('active');
+
         // Reset conversation log
         conversationLogDiv.innerHTML = '<p style="color: #8b92b0; font-style: italic;">Conversation will appear here...</p>';
 
@@ -744,8 +899,11 @@
         if (isListening) {
             recognition.stop();
         } else {
-            conversationStarted = true;  // Enable auto-reactivation
-            conversationModeDiv.classList.add('active');  // Show hands-free indicator
+            if (!conversationStarted) {
+                caseStartTime = new Date();
+            }
+            conversationStarted = true;
+            conversationModeDiv.classList.add('active');
             recognition.start();
         }
     });

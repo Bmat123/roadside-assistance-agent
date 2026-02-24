@@ -38,6 +38,7 @@ class AgentResponse(BaseModel):
     collected_data: Optional[Dict] = None
     is_covered: Optional[bool] = None
     dispatch_details: Optional[Dict] = None
+    conversation_complete: Optional[bool] = False
 
 # --- STATE MANAGEMENT (In-Memory) ---
 sessions: Dict[str, List[Dict]] = {}
@@ -73,7 +74,8 @@ async def chat(input_data: UserInput):
         ui_update=ai_response.get("ui_update"),
         collected_data=ai_response.get("collected_data"),
         is_covered=ai_response.get("is_covered"),
-        dispatch_details=ai_response.get("dispatch_details")
+        dispatch_details=ai_response.get("dispatch_details"),
+        conversation_complete=ai_response.get("conversation_complete", False)
     )
 
 # --- SERVER STARTUP ---

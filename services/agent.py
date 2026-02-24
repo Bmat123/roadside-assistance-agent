@@ -62,6 +62,10 @@ class RoadsideAgent:
                     "type": "boolean",
                     "description": "Whether the issue is covered (false until all data collected and checked)"
                 },
+                "conversation_complete": {
+                    "type": "boolean",
+                    "description": "Set to true only when the customer confirms they need nothing else and the conversation is fully closed"
+                },
                 "collected_data": {
                     "type": "object",
                     "properties": {
@@ -85,7 +89,7 @@ class RoadsideAgent:
                     "required": ["name", "car", "location", "issue"]
                 }
             },
-            "required": ["voice_response", "is_covered", "collected_data"]
+            "required": ["voice_response", "is_covered", "conversation_complete", "collected_data"]
         }
 
         # Create the GenerativeModel with structured output
