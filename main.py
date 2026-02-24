@@ -9,7 +9,7 @@ from typing import Dict, Optional, List
 import uvicorn
 import json
 
-from config import API_HOST, API_PORT, CORS_ORIGINS, STATIC_DIR
+from config import API_HOST, API_PORT, CORS_ORIGINS, STATIC_DIR, CASES_FILE
 from services.agent import RoadsideAgent
 
 app = FastAPI(title="Roadside Assistance API")
@@ -49,6 +49,18 @@ def get_history(session_id: str) -> List[Dict]:
         sessions[session_id] = []
     return sessions[session_id]
 
+# --- CASE HISTORY HELPERS ---
+def _read_cases():
+    try:
+        with open(CASES_FILE, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def _write_cases(cases):
+    with open(CASES_FILE, "w") as f:
+        json.dump(cases, f, indent=2)
+
 # --- API ENDPOINTS ---
 @app.get("/")
 async def root():
@@ -77,6 +89,23 @@ async def chat(input_data: UserInput):
         dispatch_details=ai_response.get("dispatch_details"),
         conversation_complete=ai_response.get("conversation_complete", False)
     )
+
+# --- CASE HISTORY ENDPOINTS ---
+@app.get("/cases")
+async def get_cases():
+    return _read_cases()
+
+@app.post("/cases")
+async def save_case(case: dict):
+    cases = _read_cases()
+    cases.append(case)
+    _write_cases(cases)
+    return {"saved": True}
+
+@app.delete("/cases")
+async def clear_cases():
+    _write_cases([])
+    return {"cleared": True}
 
 # --- SERVER STARTUP ---
 if __name__ == "__main__":

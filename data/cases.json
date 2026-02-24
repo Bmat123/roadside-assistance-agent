@@ -1,0 +1,15 @@
+[
+  {
+    "id": "session_1771948100470",
+    "timestamp": "2026-02-24T15:48:24.590Z",
+    "resolved_at": "2026-02-24T15:49:41.708Z",
+    "duration_seconds": 77,
+    "customer_name": "John Smith",
+    "vehicle": "Toyota Corolla from 92",
+    "location": "south of Auckland",
+    "issue": "flat tire",
+    "is_covered": true,
+    "garage": "Downtown Towing & Repair",
+    "eta": "25 min"
+  }
+]
