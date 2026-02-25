@@ -12,6 +12,7 @@ DATA_DIR = BASE_DIR / "data"
 POLICY_COVERAGE_FILE = DATA_DIR / "policy_coverage.json"
 GARAGES_FILE = DATA_DIR / "garages.json"
 CASES_FILE = DATA_DIR / "cases.json"
+CUSTOMERS_FILE = DATA_DIR / "customers.json"
 
 # Prompt paths
 PROMPTS_DIR = BASE_DIR / "prompts"

@@ -11,5 +11,44 @@
     "is_covered": true,
     "garage": "Downtown Towing & Repair",
     "eta": "25 min"
+  },
+  {
+    "id": "session_1772012124999",
+    "timestamp": "2026-02-25T09:35:29.472Z",
+    "resolved_at": "2026-02-25T09:37:16.175Z",
+    "duration_seconds": 107,
+    "customer_name": "John Smith",
+    "vehicle": "1992 Toyota Corolla",
+    "location": "motorway 110 south of San Francisco",
+    "issue": "a flat",
+    "is_covered": true,
+    "garage": "Quick Fix Auto Repair",
+    "eta": "30 min"
+  },
+  {
+    "id": "session_1772012742769",
+    "timestamp": "2026-02-25T09:45:44.321Z",
+    "resolved_at": "2026-02-25T09:47:03.861Z",
+    "duration_seconds": 80,
+    "customer_name": "Robert Williams",
+    "vehicle": "1992 Toyota Corolla",
+    "location": "100 motorway south of San Francisco",
+    "issue": "engines burning",
+    "is_covered": true,
+    "garage": "Downtown Towing & Repair",
+    "eta": "25 min"
+  },
+  {
+    "id": "session_1772012848425",
+    "timestamp": "2026-02-25T09:47:35.608Z",
+    "resolved_at": "2026-02-25T09:49:25.377Z",
+    "duration_seconds": 110,
+    "customer_name": "John Smith",
+    "vehicle": "Alexis 100",
+    "location": "south of Berlin",
+    "issue": "my engine is",
+    "is_covered": false,
+    "garage": "",
+    "eta": ""
   }
 ]

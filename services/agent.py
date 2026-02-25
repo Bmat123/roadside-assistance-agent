@@ -13,7 +13,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from config import (
     API_KEY, MODEL_NAME, POLICY_COVERAGE_FILE,
-    SYSTEM_INSTRUCTION_FILE
+    SYSTEM_INSTRUCTION_FILE, CUSTOMERS_FILE
 )
 from services.dispatch_service import DispatchService
 
@@ -39,16 +39,28 @@ class RoadsideAgent:
             print(f"⚠️ WARNING: {POLICY_COVERAGE_FILE} not found. Coverage check will fail.")
             policy_text = "{}"
 
+        # Load customer database
+        try:
+            with open(CUSTOMERS_FILE, 'r') as f:
+                customer_list = json.load(f)
+            customer_text = json.dumps(customer_list, indent=2)
+        except FileNotFoundError:
+            print(f"⚠️ WARNING: {CUSTOMERS_FILE} not found. All customers will default to basic policy.")
+            customer_text = "[]"
+
         # Load system instruction template
         try:
             with open(SYSTEM_INSTRUCTION_FILE, 'r') as f:
                 system_instruction_template = f.read()
         except FileNotFoundError:
             print(f"⚠️ WARNING: {SYSTEM_INSTRUCTION_FILE} not found. Using default prompt.")
-            system_instruction_template = "You are a helpful assistant. {policy_text}"
+            system_instruction_template = "You are a helpful assistant. {policy_text} {customer_text}"
 
-        # Inject policy into system instruction
-        system_instruction = system_instruction_template.format(policy_text=policy_text)
+        # Inject policy and customer database into system instruction
+        system_instruction = system_instruction_template.format(
+            policy_text=policy_text,
+            customer_text=customer_text
+        )
 
         # Define the response schema for structured output
         response_schema = {
@@ -84,9 +96,13 @@ class RoadsideAgent:
                         "issue": {
                             "type": "string",
                             "description": "Description of the issue or empty string if not collected yet"
+                        },
+                        "policy_level": {
+                            "type": "string",
+                            "description": "Customer's policy level (basic/premium/platinum) looked up by name, or empty string if name not yet collected"
                         }
                     },
-                    "required": ["name", "car", "location", "issue"]
+                    "required": ["name", "car", "location", "issue", "policy_level"]
                 }
             },
             "required": ["voice_response", "is_covered", "conversation_complete", "collected_data"]
@@ -166,7 +182,7 @@ class RoadsideAgent:
             return {
                 "voice_response": "I apologize, I had trouble processing that. Could you please repeat?",
                 "ui_update": None,
-                "collected_data": {"name": "", "car": "", "location": "", "issue": ""},
+                "collected_data": {"name": "", "car": "", "location": "", "issue": "", "policy_level": ""},
                 "is_covered": False
             }
         except Exception as e:
@@ -176,6 +192,6 @@ class RoadsideAgent:
             return {
                 "voice_response": "I am having trouble connecting to the AI service. Please check the server logs.",
                 "ui_update": None,
-                "collected_data": {"name": "", "car": "", "location": "", "issue": ""},
+                "collected_data": {"name": "", "car": "", "location": "", "issue": "", "policy_level": ""},
                 "is_covered": False
             }

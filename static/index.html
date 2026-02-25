@@ -209,6 +209,21 @@
             color: #4a5073;
             font-style: italic;
         }
+        .info-card.full-width {
+            grid-column: 1 / -1;
+        }
+        .policy-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .policy-badge.basic    { background: #2a2f4a; color: #8b92b0; }
+        .policy-badge.premium  { background: #1e3a5f; color: #60a5fa; }
+        .policy-badge.platinum { background: #2d1f4e; color: #c084fc; }
 
         .section {
             background-color: #1a1f3a;
@@ -522,7 +537,7 @@
     <!-- Right Panel: Observer Dashboard -->
     <div class="observer-panel">
         <div class="dashboard-header">
-            <h2>Human Observer Dashboard</h2>
+            <h2>AI support agent monitoring dashboard</h2>
             <p>Real-time monitoring of AI agent interactions</p>
             <button class="reset-btn" id="resetBtn">↺ New Session</button>
         </div>
@@ -553,6 +568,10 @@
             <div class="info-card" id="card-issue">
                 <h3>Issue Type</h3>
                 <div class="value">Waiting...</div>
+            </div>
+            <div class="info-card full-width" id="card-policy">
+                <h3>Policy Level</h3>
+                <div class="value" id="policy-value" style="color: #4a5073; font-style: italic; font-size: 1em;">Pending verification...</div>
             </div>
         </div>
 
@@ -809,6 +828,12 @@
         if (data.issue) {
             cardIssue.querySelector('.value').textContent = data.issue;
             cardIssue.classList.remove('empty');
+        }
+        if (data.policy_level) {
+            const policyEl = document.getElementById('policy-value');
+            const label = data.policy_level.charAt(0).toUpperCase() + data.policy_level.slice(1);
+            policyEl.innerHTML = `<span class="policy-badge ${data.policy_level}">${label}</span>`;
+            policyEl.style.fontStyle = 'normal';
         }
     }
 
@@ -1078,6 +1103,10 @@
             card.querySelector('.value').textContent = 'Waiting...';
             card.classList.remove('empty');
         });
+        const policyEl = document.getElementById('policy-value');
+        policyEl.innerHTML = 'Pending verification...';
+        policyEl.style.fontStyle = 'italic';
+        policyEl.style.color = '#4a5073';
 
         // Reset coverage status
         coverageStatusDiv.innerHTML = '<span class="coverage-status pending">Awaiting Information</span>';

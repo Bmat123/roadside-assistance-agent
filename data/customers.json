@@ -1,0 +1,12 @@
+[
+  { "name": "John Smith",       "policy": "basic" },
+  { "name": "Sarah Johnson",    "policy": "basic" },
+  { "name": "Mike Chen",        "policy": "basic" },
+  { "name": "Emma Wilson",      "policy": "basic" },
+  { "name": "James Anderson",   "policy": "premium" },
+  { "name": "Lisa Martinez",    "policy": "premium" },
+  { "name": "David Taylor",     "policy": "premium" },
+  { "name": "Rachel Moore",     "policy": "platinum" },
+  { "name": "Robert Williams",  "policy": "platinum" },
+  { "name": "Anna Thompson",    "policy": "platinum" }
+]
